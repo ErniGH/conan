@@ -56,7 +56,7 @@ def generate_sbom(conanfile, out_file, **kwargs):
         # } for f in files],
     }
     try:
-        with open(out_path, 'w') as f:
+        with open(out_file, 'w') as f:
             json.dump(data, f, indent=4)
     except Exception as e:
         ConanException("error generating spdx file")
