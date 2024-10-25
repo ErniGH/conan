@@ -82,7 +82,7 @@ def write_generators(conanfile, app, envs_generation=None):
     hook_manager.execute("pre_generate", conanfile=conanfile)
 
     # Generate sbom
-    _generate_sbom(conanfile._conan_helpers.home_folder, conanfile)
+    _generate_sbom(conanfile)
 
     if conanfile.generators:
         conanfile.output.highlight(f"Writing generators to {new_gen_folder}")
@@ -156,7 +156,8 @@ def _receive_conf(conanfile):
             conanfile.conf.compose_conf(build_require.conf_info)
 
 
-def _generate_sbom(cache_folder, conanfile):
+def _generate_sbom(conanfile):
+    cache_folder = conanfile._conan_helpers.home_folder, 
     from conans.client.loader import load_python_file
     sbom_plugin_path = HomePaths(cache_folder).sbom_manifest_plugin_path
     if os.path.exists(sbom_plugin_path):
