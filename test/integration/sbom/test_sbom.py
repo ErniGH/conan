@@ -1,5 +1,6 @@
 from conan.test.assets.genconanfile import GenConanfile
 from conan.test.utils.tools import TestClient
+import os
 
 
 def test_sbom_generation():
@@ -8,3 +9,5 @@ def test_sbom_generation():
              "conanfile.py": GenConanfile("foo", "1.0").with_requires("dep/1.0")})
     tc.run("export dep")
     tc.run("create . --build=missing")
+    assert os.path.exists(os.path.join(tc.current_folder, "spdx", "dep-1.0-SPDX.json"))
+    assert os.path.exists(os.path.join(tc.current_folder, "spdx", "foo-1.0-SPDX.json"))
