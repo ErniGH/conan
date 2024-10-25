@@ -170,8 +170,11 @@ def _generate_sbom(cache_folder, conanfile):
                 f"SBOM manifest plugin 'generate_sbom' is not a function")
 
         ConanOutput().warning(f"generating sbom")
+        # TODO: Think where it makes sense to generate the file at this point
+        safe_ref_filename = str(conan.ref).replace("/", "_").replace(".", "_")
+        outfile = os.path.join(os.path.curdir, f"sbom_{safe_ref_filename}.json") # Temp
         # TODO think if this is conanfile or conanfile._conan_node
-        return mod.generate_sbom(conanfile)
+        return mod.generate_sbom(conanfile, outfile)
 
 
 def _generate_aggregated_env(conanfile):
