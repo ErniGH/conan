@@ -81,9 +81,6 @@ def write_generators(conanfile, app, envs_generation=None):
     global_generators = load_cache_generators(HomePaths(app.cache_folder).custom_generators_path)
     hook_manager.execute("pre_generate", conanfile=conanfile)
 
-    # Generate sbom
-    _generate_sbom(conanfile)
-
     if conanfile.generators:
         conanfile.output.highlight(f"Writing generators to {new_gen_folder}")
     # generators check that they are not present in the generators field,
@@ -140,6 +137,8 @@ def write_generators(conanfile, app, envs_generation=None):
 
     _generate_aggregated_env(conanfile)
 
+    _generate_graph_manifests(conanfile)
+
     hook_manager.execute("post_generate", conanfile=conanfile)
 
 
@@ -156,8 +155,8 @@ def _receive_conf(conanfile):
             conanfile.conf.compose_conf(build_require.conf_info)
 
 
-def _generate_sbom(conanfile):
-    cache_folder = conanfile._conan_helpers.home_folder, 
+def _generate_graph_manifests(conanfile):
+    cache_folder = conanfile._conan_helpers.home_folder,
     from conans.client.loader import load_python_file
     sbom_plugin_path = HomePaths(cache_folder).sbom_manifest_plugin_path
     if os.path.exists(sbom_plugin_path):
@@ -170,12 +169,9 @@ def _generate_sbom(conanfile):
             raise ConanException(
                 f"SBOM manifest plugin 'generate_sbom' is not a function")
 
-        ConanOutput().warning(f"generating sbom")
-        # TODO: Think where it makes sense to generate the file at this point
-        safe_ref_filename = str(conan.ref).replace("/", "_").replace(".", "_")
-        outfile = os.path.join(os.path.curdir, f"sbom_{safe_ref_filename}.json") # Temp
+        ConanOutput().warning(f"generating sbom", warn_tag="experimental")
         # TODO think if this is conanfile or conanfile._conan_node
-        return mod.generate_sbom(conanfile, outfile)
+        return mod.generate_sbom(conanfile)
 
 
 def _generate_aggregated_env(conanfile):

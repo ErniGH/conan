@@ -84,6 +84,5 @@ def install(conan_api, parser, *args):
     lockfile = conan_api.lockfile.update_lockfile(lockfile, deps_graph, args.lockfile_packages,
                                                   clean=args.lockfile_clean)
     conan_api.lockfile.save_lockfile(lockfile, args.lockfile_out, cwd)
-
     return {"graph": deps_graph,
             "conan_api": conan_api}
