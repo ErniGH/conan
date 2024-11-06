@@ -72,7 +72,7 @@ def load_cache_generators(path):
     return result
 
 
-def write_generators(conanfile, app, envs_generation=None):
+def write_generators(conanfile, app, envs_generation=None, deps_graph=None):
     new_gen_folder = conanfile.generators_folder
     _receive_conf(conanfile)
 
@@ -136,8 +136,8 @@ def write_generators(conanfile, app, envs_generation=None):
                 env.generate()
 
     _generate_aggregated_env(conanfile)
-
-    _generate_graph_manifests(conanfile)
+    if deps_graph:
+        _generate_graph_manifests(deps_graph, app)
 
     hook_manager.execute("post_generate", conanfile=conanfile)
 
@@ -155,10 +155,9 @@ def _receive_conf(conanfile):
             conanfile.conf.compose_conf(build_require.conf_info)
 
 
-def _generate_graph_manifests(conanfile):
-    cache_folder = conanfile._conan_helpers.home_folder,
+def _generate_graph_manifests(sub_graph, app):
     from conans.client.loader import load_python_file
-    sbom_plugin_path = HomePaths(cache_folder).sbom_manifest_plugin_path
+    sbom_plugin_path = HomePaths(app.cache_folder).sbom_manifest_plugin_path
     if os.path.exists(sbom_plugin_path):
         mod, _ = load_python_file(sbom_plugin_path)
 
@@ -171,7 +170,7 @@ def _generate_graph_manifests(conanfile):
 
         ConanOutput().warning(f"generating sbom", warn_tag="experimental")
         # TODO think if this is conanfile or conanfile._conan_node
-        return mod.generate_sbom(conanfile)
+        return mod.generate_sbom(sub_graph)
 
 
 def _generate_aggregated_env(conanfile):
