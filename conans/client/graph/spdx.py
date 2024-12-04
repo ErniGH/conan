@@ -1,16 +1,101 @@
-spdx_json_generator = """
-import os
-import time
-import json
-import pathlib
-from glob import glob
-from datetime import datetime, timezone
-from conan import conan_version
-from conan.errors import ConanException
-from conan.api.output import ConanOutput
+# TODO RENAME THIS FILE
 
+spdx_json_generator = """
 
 def generate_sbom(graph, **kwargs):
+    cyclonedx_1_4(graph, **kwargs)
+    #spdx_sbom(graph, **kwargs)
+
+def cyclonedx_1_4(graph, **kwargs):
+    import json
+    import os
+    import uuid
+    import time
+    from datetime import datetime, timezone
+    from conan import conan_version
+    from conan.errors import ConanException
+    from conan.api.subapi.graph import CONTEXT_BUILD
+    from conan.api.output import ConanOutput
+
+    def filter_context(n): return n.context != CONTEXT_BUILD
+
+    components = [node for node in graph.nodes if filter_context(node) and node.recipe != "Cli"]
+    IS_CLI = graph.root.recipe == "Cli"
+    CLI_ID = str(uuid.uuid4())
+
+    dependencies = []
+    if IS_CLI:
+        deps = {"ref": CLI_ID}
+        deps["dependsOn"] = [f"pkg:conan/{d.dst.name}@{d.dst.ref.version}?rref={d.dst.ref.revision}" for d in graph.root.dependencies]
+        dependencies.append(deps)
+    for c in components:
+        deps = {"ref": f"pkg:conan/{c.name}@{c.ref.version}?rref={c.ref.revision}"}
+        dependsOn = [f"pkg:conan/{d.dst.name}@{d.dst.ref.version}?rref={d.dst.ref.revision}" for d in c.dependencies]
+        if dependsOn:
+            deps["dependsOn"] = dependsOn
+        dependencies.append(deps)
+
+    sbom_cyclonedx_1_4 = {
+        **({"components": [{
+            "author": "Conan",
+            "bom-ref": CLI_ID if IS_CLI else "pkg:conan/{c.name}@{c.ref.version}?rref={c.ref.revision}",
+            "description": c.conanfile.description,
+            **({"externalReferences": [{
+                "type": "website",
+                "url": c.conanfile.homepage
+            }]} if c.conanfile.homepage else {}),
+            "licenses": [{
+                "license": {
+                    "id": c.conanfile.license
+                }
+            }],
+            "name": c.name,
+            "fpurl": f"pkg:conan/{c.name}@{c.ref.version}?rref={c.ref.revision}",
+            "type": "library",
+            "version": str(c.ref.version),
+        } for c in components]} if components else {}),
+        **({"dependencies": dependencies} if dependencies else {}),
+        "metadata": {
+            "component": {
+                "author": "Conan",
+                "bom-ref": "pkg:conan/{graph.root.name}@{graph.root.ref.version}?rref={graph.root.ref.revision}",
+                "name": graph.root.name,
+                "type": "library"
+            },
+            "timestamp": f"{datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')}",
+            "tools": [{
+                "externalReferences": [{
+                    "type": "website",
+                    "url": "https://github.com/conan-io/conan"
+                }],
+                "name": "Conan-io"
+            }],
+        },
+        "serialNumber": f"urn:uuid:{uuid.uuid4()}",
+        "bomFormat": "CycloneDX",
+        "specVersion": "1.4",
+        "version": 1,
+    }
+    try:
+        metadata_folder = graph.root.conanfile.package_metadata_folder
+        file_name = "CLI-cyclonedx.json" if IS_CLI else f"{graph.root.name}-{graph.root.ref.version}-cyclonedx.json"
+        with open(os.path.join(metadata_folder, file_name), 'w') as f:
+            json.dump(sbom_cyclonedx_1_4, f, indent=4)
+        ConanOutput().success(f"CYCLONEDX CREATED - {graph.root.conanfile.package_metadata_folder}")
+    except Exception as e:
+        ConanException("error generating CYCLONEDX file")
+
+def spdx_sbom(graph, **kwargs):
+    import os
+    import time
+    import json
+    import pathlib
+    from glob import glob
+    from datetime import datetime, timezone
+    from conan import conan_version
+    from conan.errors import ConanException
+    from conan.api.output import ConanOutput
+
     name = graph.root.name if graph.root.name else "CLI"
     version = "SPDX-2.2"
     date = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
