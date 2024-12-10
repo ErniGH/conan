@@ -25,3 +25,20 @@ def test_sbom_generation_install():
     #cli -> foo -> dep
     tc.run("install --requires=foo/1.0")
     assert os.path.exists(os.path.join(tc.current_folder, "CLI-cyclonedx.json"))
+
+def test_sbom_generation_skipped_dependencies():
+    tc = TestClient()
+    tc.save({"dep/conanfile.py": GenConanfile("dep", "1.0"),
+             "app/conanfile.py": GenConanfile("app", "1.0")
+                                .with_package_type("application")
+                                .with_requires("dep/1.0"),
+             "conanfile.py": GenConanfile("foo", "1.0").with_tool_requires("app/1.0")})
+    tc.run("create dep")
+    tc.run("create app")
+    tc.run("create .")
+    create_layout = tc.created_layout()
+
+    cyclone_path = os.path.join(create_layout.build(), "..", "d", "metadata", "foo-1.0-cyclonedx.json")
+    content = tc.load(cyclone_path)
+    # A skipped dependency also shows up in the sbom
+    assert "pkg:conan/dep@1.0?rref=6a99f55e933fb6feeb96df134c33af44" in content
