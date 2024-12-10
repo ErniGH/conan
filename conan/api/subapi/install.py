@@ -89,7 +89,6 @@ class InstallAPI:
             if gen not in final_generators:
                 final_generators.append(gen)
         conanfile.generators = final_generators
-        app = ConanApp(self.conan_api)
         hook_manager = HookManager(HomePaths(self.conan_api.home_folder).hooks_path)
         write_generators(conanfile, hook_manager, self.conan_api.home_folder,
                          envs_generation=envs_generation)
