@@ -17,9 +17,10 @@ def cyclonedx_1_4(graph, **kwargs):
     from conan.api.subapi.graph import CONTEXT_BUILD
     from conan.api.output import ConanOutput
 
-    def filter_context(n): return n.context != CONTEXT_BUILD
+    if graph.root.conanfile.tested_reference_str: # Is a test package
+        return
 
-    components = [node for node in graph.nodes if filter_context(node) and node.recipe != "Cli"]
+    components = [node for node in graph.nodes if node.recipe != "Cli"]
     IS_CLI = graph.root.recipe == "Cli"
     CLI_ID = str(uuid.uuid4())
 
@@ -35,6 +36,15 @@ def cyclonedx_1_4(graph, **kwargs):
             deps["dependsOn"] = dependsOn
         dependencies.append(deps)
 
+    def _calculate_licenses(component):
+        if isinstance(component.conanfile.license, str): # Just one license
+            return [{"license": {
+                        "id": component.conanfile.license
+                    }}]
+        return [{"license": {
+                    "id": license
+                }} for license in c.conanfile.license]
+
     sbom_cyclonedx_1_4 = {
         **({"components": [{
             "author": "Conan",
@@ -44,11 +54,7 @@ def cyclonedx_1_4(graph, **kwargs):
                 "type": "website",
                 "url": c.conanfile.homepage
             }]} if c.conanfile.homepage else {}),
-            "licenses": [{
-                "license": {
-                    "id": c.conanfile.license
-                }
-            }],
+            **({"licenses": _calculate_licenses(c)} if c.conanfile.license else {}),
             "name": c.name,
             "fpurl": f"pkg:conan/{c.name}@{c.ref.version}?rref={c.ref.revision}",
             "type": "library",
@@ -224,7 +230,7 @@ def spdx_sbom(graph, **kwargs):
     }
     try:
         metadata_folder = graph.root.conanfile.package_metadata_folder
-        with open(os.path.join(metadata_folder, f"{name}-{graph.root.ref.version if graph.root.ref else "local"}.spdx.json"), 'w') as f:
+        with open(os.path.join(metadata_folder, f"{name}-{graph.root.ref.version if graph.root.ref else 'local'}.spdx.json"), 'w') as f:
             json.dump(data, f, indent=4)
         ConanOutput().success(f"SPDX CREATED - {graph.root.conanfile.package_metadata_folder}")
     except Exception as e:
