@@ -64,7 +64,7 @@ def cyclonedx_1_4(graph, **kwargs):
         "metadata": {
             "component": {
                 "author": "Conan",
-                "bom-ref": f"pkg:conan/{graph.root.name}@{graph.root.ref.version}?rref={graph.root.ref.revision}",
+                "bom-ref": CLI_ID if IS_CLI else f"pkg:conan/{graph.root.name}@{graph.root.ref.version}?rref={graph.root.ref.revision}",
                 "name": graph.root.name,
                 "type": "library"
             },
