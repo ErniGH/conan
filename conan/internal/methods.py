@@ -9,6 +9,7 @@ from conans.model.package_ref import PkgReference
 from conans.model.pkg_type import PackageType
 from conans.model.requires import BuildRequirements, TestRequirements, ToolRequirements
 from conans.util.files import mkdir, chdir, save
+from conan.internal.api.install.generators import generate_graph_manifests
 
 
 def run_source_method(conanfile, hook_manager):
@@ -63,6 +64,7 @@ def run_package_method(conanfile, package_id, hook_manager, ref):
                 with conanfile_remove_attr(conanfile, ['info'], "package"):
                     conanfile.package()
     hook_manager.execute("post_package", conanfile=conanfile)
+    generate_graph_manifests(conanfile, conanfile._conan_helpers.home_folder)
 
     save(os.path.join(conanfile.package_folder, CONANINFO), conanfile.info.dumps())
     manifest = FileTreeManifest.create(conanfile.package_folder)
