@@ -34,7 +34,8 @@ _generators = {"CMakeToolchain": "conan.tools.cmake",
                "SConsDeps": "conan.tools.scons",
                "QbsDeps": "conan.tools.qbs",
                "QbsProfile": "conan.tools.qbs",
-               "CPSDeps": "conan.tools.cps"
+               "CPSDeps": "conan.tools.cps",
+               "ROSEnv": "conan.tools.ros"
                }
 
 
@@ -72,13 +73,13 @@ def load_cache_generators(path):
     return result
 
 
-def write_generators(conanfile, app, envs_generation=None):
+def write_generators(conanfile, hook_manager, home_folder, envs_generation=None):
     new_gen_folder = conanfile.generators_folder
     _receive_conf(conanfile)
+    _receive_generators(conanfile)
 
-    hook_manager = app.hook_manager
     # TODO: Optimize this, so the global generators are not loaded every call to write_generators
-    global_generators = load_cache_generators(HomePaths(app.cache_folder).custom_generators_path)
+    global_generators = load_cache_generators(HomePaths(home_folder).custom_generators_path)
     hook_manager.execute("pre_generate", conanfile=conanfile)
 
     if conanfile.generators:
@@ -93,8 +94,12 @@ def write_generators(conanfile, app, envs_generation=None):
     conanfile.generators = []
     try:
         for generator_name in old_generators:
-            global_generator = global_generators.get(generator_name)
-            generator_class = global_generator or _get_generator_class(generator_name)
+            if isinstance(generator_name, str):
+                global_generator = global_generators.get(generator_name)
+                generator_class = global_generator or _get_generator_class(generator_name)
+            else:
+                generator_class = generator_name
+                generator_name = generator_class.__name__
             if generator_class:
                 try:
                     generator = generator_class(conanfile)
@@ -137,7 +142,7 @@ def write_generators(conanfile, app, envs_generation=None):
 
     _generate_aggregated_env(conanfile)
 
-    _generate_graph_manifests(conanfile, app.cache_folder)
+    generate_graph_manifests(conanfile, home_folder)
 
     hook_manager.execute("post_generate", conanfile=conanfile)
 
@@ -155,7 +160,7 @@ def _receive_conf(conanfile):
             conanfile.conf.compose_conf(build_require.conf_info)
 
 
-def _generate_graph_manifests(conanfile, home_folder):
+def generate_graph_manifests(conanfile, home_folder):
     from conans.client.loader import load_python_file
     sub_graph = conanfile.subgraph
     sbom_plugin_path = HomePaths(home_folder).sbom_manifest_plugin_path
@@ -172,6 +177,17 @@ def _generate_graph_manifests(conanfile, home_folder):
         ConanOutput().warning(f"generating sbom", warn_tag="experimental")
         # TODO think if this is conanfile or conanfile._conan_node
         return mod.generate_sbom(sub_graph)
+
+def _receive_generators(conanfile):
+    """  Collect generators_info from the immediate build_requires"""
+    for build_req in conanfile.dependencies.direct_build.values():
+        if build_req.generator_info:
+            if not isinstance(build_req.generator_info, list):
+                raise ConanException(f"{build_req} 'generator_info' must be a list")
+            names = [c.__name__ if not isinstance(c, str) else c for c in build_req.generator_info]
+            conanfile.output.warning(f"Tool-require {build_req} adding generators: {names}",
+                                     warn_tag="experimental")
+            conanfile.generators = build_req.generator_info + conanfile.generators
 
 
 def _generate_aggregated_env(conanfile):

@@ -1,10 +1,12 @@
 import os
 
 from conan.internal.api.install.generators import write_generators
+from conan.internal.cache.home_paths import HomePaths
 from conan.internal.conan_app import ConanApp
 from conan.internal.deploy import do_deploys
 
 from conans.client.graph.install_graph import InstallGraph
+from conans.client.hook_manager import HookManager
 from conans.client.installer import BinaryInstaller
 from conan.errors import ConanInvalidConfiguration
 
@@ -88,4 +90,6 @@ class InstallAPI:
                 final_generators.append(gen)
         conanfile.generators = final_generators
         app = ConanApp(self.conan_api)
-        write_generators(conanfile, app, envs_generation=envs_generation) # TODO add deps_graph without cli node
+        hook_manager = HookManager(HomePaths(self.conan_api.home_folder).hooks_path)
+        write_generators(conanfile, hook_manager, self.conan_api.home_folder,
+                         envs_generation=envs_generation)

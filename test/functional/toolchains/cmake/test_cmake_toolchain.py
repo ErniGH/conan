@@ -8,11 +8,10 @@ import pytest
 
 from conan.tools.cmake.presets import load_cmake_presets
 from conan.tools.microsoft.visual import vcvars_command
-from conans.model.recipe_ref import RecipeReference
 from conan.test.assets.cmake import gen_cmakelists
 from conan.test.assets.genconanfile import GenConanfile
 from conan.test.utils.test_files import temp_folder
-from conan.test.utils.tools import TestClient, TurboTestClient
+from conan.test.utils.tools import TestClient
 from conans.util.files import save, load, rmdir
 from test.conftest import tools_locations
 
@@ -230,6 +229,8 @@ def test_cmake_toolchain_cmake_vs_debugger_environment():
                            f"$<$<CONFIG:Release>:{release_bindir}>" \
                            f"$<$<CONFIG:MinSizeRel>:{minsizerel_bindir}>;%PATH%"
     assert debugger_environment in toolchain
+
+
 @pytest.mark.tool("cmake")
 def test_cmake_toolchain_cmake_vs_debugger_environment_not_needed():
     client = TestClient()
@@ -241,7 +242,6 @@ def test_cmake_toolchain_cmake_vs_debugger_environment_not_needed():
     client.run(f"install --require=pkg/1.0 -s build_type=Release -g CMakeToolchain {cmake_generator}")
     toolchain = client.load("conan_toolchain.cmake")
     assert "CMAKE_VS_DEBUGGER_ENVIRONMENT" not in toolchain
-
 
 
 @pytest.mark.tool("cmake")
@@ -335,12 +335,10 @@ def test_install_output_directories():
     If we change the libdirs of the cpp.package, as we are doing cmake.install, the output directory
     for the libraries is changed
     """
-    ref = RecipeReference.loads("zlib/1.2.11")
-    client = TurboTestClient()
+    client = TestClient()
     client.run("new cmake_lib -d name=zlib -d version=1.2.11")
-    cf = client.load("conanfile.py")
-    pref = client.create(ref, conanfile=cf)
-    p_folder = client.get_latest_pkg_layout(pref).package()
+    client.run("create .")
+    p_folder = client.created_layout().package()
     assert not os.path.exists(os.path.join(p_folder, "mylibs"))
     assert os.path.exists(os.path.join(p_folder, "lib"))
 
@@ -349,12 +347,14 @@ def test_install_output_directories():
     cf = cf.replace("cmake_layout(self)",
                     'cmake_layout(self)\n        self.cpp.package.libdirs = ["mylibs"]')
 
-    pref = client.create(ref, conanfile=cf)
-    p_folder = client.get_latest_pkg_layout(pref).package()
+    client.save({"conanfile.py": cf})
+    client.run("create .")
+    layout = client.created_layout()
+    p_folder = layout.package()
     assert os.path.exists(os.path.join(p_folder, "mylibs"))
     assert not os.path.exists(os.path.join(p_folder, "lib"))
 
-    b_folder = client.get_latest_pkg_layout(pref).build()
+    b_folder = layout.build()
     if platform.system() != "Windows":
         gen_folder = os.path.join(b_folder, "build", "Release", "generators")
     else:
@@ -620,6 +620,9 @@ def test_cmake_toolchain_runtime_types_cmake_older_than_3_15():
 
 @pytest.mark.skipif(platform.system() != "Windows", reason="Only for windows")
 class TestWinSDKVersion:
+
+    @pytest.mark.tool("cmake", "3.23")
+    @pytest.mark.tool("visual_studio", "17")
     def test_cmake_toolchain_winsdk_version(self):
         # This test passes also with CMake 3.28, as long as cmake_minimum_required(VERSION 3.27)
         # is not defined
@@ -629,9 +632,9 @@ class TestWinSDKVersion:
         cmake += 'message(STATUS "CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION = ' \
                  '${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")'
         client.save({"CMakeLists.txt": cmake})
-        client.run("create . -s arch=x86_64 -s compiler.version=193 "
-                   "-c tools.microsoft:winsdk_version=8.1")
-        assert "CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION = 8.1" in client.out
+        client.run("create . -s arch=x86_64 -s compiler.version=194 "
+                   "-c tools.microsoft:winsdk_version=10.0")
+        assert "CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION = 10.0" in client.out
         assert "Conan toolchain: CMAKE_GENERATOR_PLATFORM=x64" in client.out
         assert "Conan toolchain: CMAKE_GENERATOR_PLATFORM=x64,version" not in client.out
 
@@ -647,11 +650,11 @@ class TestWinSDKVersion:
         cmake += 'message(STATUS "CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION = ' \
                  '${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")'
         client.save({"CMakeLists.txt": cmake})
-        client.run("create . -s arch=x86_64 -s compiler.version=193 "
-                   "-c tools.microsoft:winsdk_version=8.1 "
+        client.run("create . -s arch=x86_64 -s compiler.version=194 "
+                   "-c tools.microsoft:winsdk_version=10.0 "
                    '-c tools.cmake.cmaketoolchain:generator="Visual Studio 17"')
-        assert "CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION = 8.1" in client.out
-        assert "Conan toolchain: CMAKE_GENERATOR_PLATFORM=x64,version=8.1" in client.out
+        assert "CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION = 10.0" in client.out
+        assert "Conan toolchain: CMAKE_GENERATOR_PLATFORM=x64,version=10.0" in client.out
 
 
 @pytest.mark.tool("cmake", "3.23")
