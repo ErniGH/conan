@@ -48,7 +48,7 @@ def cyclonedx_1_4(graph, **kwargs):
     sbom_cyclonedx_1_4 = {
         **({"components": [{
             "author": "Conan",
-            "bom-ref": CLI_ID if IS_CLI else "pkg:conan/{c.name}@{c.ref.version}?rref={c.ref.revision}",
+            "bom-ref": CLI_ID if IS_CLI else f"pkg:conan/{c.name}@{c.ref.version}?rref={c.ref.revision}",
             "description": c.conanfile.description,
             **({"externalReferences": [{
                 "type": "website",
@@ -64,7 +64,7 @@ def cyclonedx_1_4(graph, **kwargs):
         "metadata": {
             "component": {
                 "author": "Conan",
-                "bom-ref": "pkg:conan/{graph.root.name}@{graph.root.ref.version}?rref={graph.root.ref.revision}",
+                "bom-ref": f"pkg:conan/{graph.root.name}@{graph.root.ref.version}?rref={graph.root.ref.revision}",
                 "name": graph.root.name,
                 "type": "library"
             },
