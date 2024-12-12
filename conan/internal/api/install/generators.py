@@ -162,6 +162,7 @@ def _receive_conf(conanfile):
 
 def generate_graph_manifests(conanfile, home_folder):
     from conans.client.loader import load_python_file
+    mkdir(conanfile.package_metadata_folder)
     sub_graph = conanfile.subgraph
     sbom_plugin_path = HomePaths(home_folder).sbom_manifest_plugin_path
     if os.path.exists(sbom_plugin_path):

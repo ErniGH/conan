@@ -1,3 +1,5 @@
+import textwrap
+
 from conan.test.assets.genconanfile import GenConanfile
 from conan.test.utils.tools import TestClient
 import os
@@ -15,7 +17,7 @@ def test_sbom_generation_create():
     bar_layout = tc.created_layout()
     assert os.path.exists(os.path.join(bar_layout.build(),"..", "d", "metadata", "bar-1.0-cyclonedx.json"))
 
-def test_sbom_generation_install():
+def test_sbom_generation_install_requires():
     tc = TestClient()
     tc.save({"dep/conanfile.py": GenConanfile("dep", "1.0"),
              "conanfile.py": GenConanfile("foo", "1.0").with_requires("dep/1.0")})
@@ -25,6 +27,43 @@ def test_sbom_generation_install():
     #cli -> foo -> dep
     tc.run("install --requires=foo/1.0")
     assert os.path.exists(os.path.join(tc.current_folder, "CLI-cyclonedx.json"))
+
+def test_sbom_generation_install_path():
+    tc = TestClient()
+    tc.save({"dep/conanfile.py": GenConanfile("dep", "1.0"),
+             "conanfile.py": GenConanfile("foo", "1.0").with_requires("dep/1.0")})
+    tc.run("create dep")
+
+    #foo -> dep
+    tc.run("install .")
+    assert os.path.exists(os.path.join(tc.current_folder, "foo-1.0-cyclonedx.json"))
+
+def test_sbom_generation_install_path_consumer():
+    # There is not .../d/metadata/...
+    tc = TestClient()
+    tc.save({"dep/conanfile.py": GenConanfile("dep", "1.0"),
+             "conanfile.py": GenConanfile().with_requires("dep/1.0")})
+    tc.run("create dep")
+
+    #conanfile.py -> dep
+    tc.run("install .")
+    assert os.path.exists(os.path.join(tc.current_folder, "CONANFILE-PY-cyclonedx.json"))
+
+def test_sbom_generation_install_path_txt():
+    # There is not .../d/metadata/...
+    tc = TestClient()
+    tc.save({"dep/conanfile.py": GenConanfile("dep", "1.0"),
+             "conanfile.txt": textwrap.dedent(
+                 """
+                 [requires]
+                 dep/1.0
+                 """
+             )})
+    tc.run("create dep")
+
+    #foo -> dep
+    tc.run("install .")
+    assert os.path.exists(os.path.join(tc.current_folder, "CONANFILE-TXT-cyclonedx.json"))
 
 def test_sbom_generation_skipped_dependencies():
     tc = TestClient()

@@ -17,16 +17,21 @@ def cyclonedx_1_4(graph, **kwargs):
     from conan.api.subapi.graph import CONTEXT_BUILD
     from conan.api.output import ConanOutput
 
-    if graph.root.conanfile.tested_reference_str: # Is a test package
-        return
 
-    components = [node for node in graph.nodes if node.recipe != "Cli"]
-    IS_CLI = graph.root.recipe == "Cli"
-    CLI_ID = str(uuid.uuid4())
+    SPECIAL_LIST = ["cli", "conanfile.txt", "conanfile.py"]
+    is_test = bool(graph.root.conanfile.tested_reference_str)
+
+    has_special_root_node = is_test or graph.root.conanfile.display_name in SPECIAL_LIST
+    special_id = str(uuid.uuid4())
+    special_name = graph.root.conanfile.display_name.replace(".", "-").replace(" ", "_").replace("/", "-").upper()
+
+    components = [node for node in graph.nodes]
+    if has_special_root_node:
+        components = components[1:]
 
     dependencies = []
-    if IS_CLI:
-        deps = {"ref": CLI_ID}
+    if has_special_root_node:
+        deps = {"ref": special_id}
         deps["dependsOn"] = [f"pkg:conan/{d.dst.name}@{d.dst.ref.version}?rref={d.dst.ref.revision}" for d in graph.root.dependencies]
         dependencies.append(deps)
     for c in components:
@@ -48,7 +53,7 @@ def cyclonedx_1_4(graph, **kwargs):
     sbom_cyclonedx_1_4 = {
         **({"components": [{
             "author": "Conan",
-            "bom-ref": CLI_ID if IS_CLI else f"pkg:conan/{c.name}@{c.ref.version}?rref={c.ref.revision}",
+            "bom-ref": special_id if has_special_root_node else f"pkg:conan/{c.name}@{c.ref.version}?rref={c.ref.revision}",
             "description": c.conanfile.description,
             **({"externalReferences": [{
                 "type": "website",
@@ -64,8 +69,8 @@ def cyclonedx_1_4(graph, **kwargs):
         "metadata": {
             "component": {
                 "author": "Conan",
-                "bom-ref": CLI_ID if IS_CLI else f"pkg:conan/{graph.root.name}@{graph.root.ref.version}?rref={graph.root.ref.revision}",
-                "name": graph.root.name,
+                "bom-ref": special_id if has_special_root_node else f"pkg:conan/{c.name}@{c.ref.version}?rref={c.ref.revision}",
+                "name": graph.root.conanfile.display_name,
                 "type": "library"
             },
             "timestamp": f"{datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')}",
@@ -84,11 +89,13 @@ def cyclonedx_1_4(graph, **kwargs):
     }
     try:
         metadata_folder = graph.root.conanfile.package_metadata_folder
-        file_name = "CLI-cyclonedx.json" if IS_CLI else f"{graph.root.name}-{graph.root.ref.version}-cyclonedx.json"
+        file_name = f"{special_name}-cyclonedx.json" if has_special_root_node else f"{graph.root.name}-{graph.root.ref.version}-cyclonedx.json"
         with open(os.path.join(metadata_folder, file_name), 'w') as f:
             json.dump(sbom_cyclonedx_1_4, f, indent=4)
+        breakpoint()
         ConanOutput().success(f"CYCLONEDX CREATED - {graph.root.conanfile.package_metadata_folder}")
     except Exception as e:
+        breakpoint()
         ConanException("error generating CYCLONEDX file")
 
 def spdx_sbom(graph, **kwargs):
