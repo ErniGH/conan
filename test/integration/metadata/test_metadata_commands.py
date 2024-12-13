@@ -33,7 +33,7 @@ class TestMetadataCommands:
         # Now upload everything
         c.run("upload * -c -r=default")
         assert "pkg/0.1: Recipe metadata: 1 files" in c.out
-        assert "pkg/0.1:da39a3ee5e6b4b0d3255bfef95601890afd80709: Package metadata: 1 files" in c.out
+        assert "pkg/0.1:da39a3ee5e6b4b0d3255bfef95601890afd80709: Package metadata: 2 files" in c.out
 
         # Add new files to the metadata
         self.save_metadata_file(c, "pkg/0.1", "mylogs2.txt")
@@ -42,7 +42,7 @@ class TestMetadataCommands:
         # adding the new metadata logs files
         c.run("upload * -c -r=default --metadata=*")
         assert "pkg/0.1: Recipe metadata: 2 files" in c.out
-        assert "pkg/0.1:da39a3ee5e6b4b0d3255bfef95601890afd80709: Package metadata: 2 files" in c.out
+        assert "pkg/0.1:da39a3ee5e6b4b0d3255bfef95601890afd80709: Package metadata: 3 files" in c.out
 
         c.run("remove * -c")
         c.run("install --requires=pkg/0.1")  # wont install metadata by default
@@ -116,7 +116,7 @@ class TestMetadataCommands:
         # Now upload everything
         c.run("upload * -c -r=default")
         assert "pkg/0.1: Recipe metadata: 1 files" in c.out
-        assert "pkg/0.1:da39a3ee5e6b4b0d3255bfef95601890afd80709: Package metadata: 1 files" in c.out
+        assert "pkg/0.1:da39a3ee5e6b4b0d3255bfef95601890afd80709: Package metadata: 2 files" in c.out
 
         c.run("remove * -c")
 
@@ -146,7 +146,7 @@ class TestMetadataCommands:
         # Now upload everything
         c.run("upload * -c -r=default")
         assert "pkg/0.1: Recipe metadata: 1 files" in c.out
-        assert "pkg/0.1:da39a3ee5e6b4b0d3255bfef95601890afd80709: Package metadata: 1 files" in c.out
+        assert "pkg/0.1:da39a3ee5e6b4b0d3255bfef95601890afd80709: Package metadata: 2 files" in c.out
 
         c2 = TestClient(servers=c.servers)
         tmp_folder = temp_folder()
@@ -169,7 +169,7 @@ class TestMetadataCommands:
         save(mypkgfile, "mybuildlogs2!!!!")
         c.run("upload * -c -r=default --metadata=*")
         assert "pkg/0.1: Recipe metadata: 1 files" in c.out
-        assert "pkg/0.1:da39a3ee5e6b4b0d3255bfef95601890afd80709: Package metadata: 1 files" in c.out
+        assert "pkg/0.1:da39a3ee5e6b4b0d3255bfef95601890afd80709: Package metadata: 2 files" in c.out
 
         # re-download of metadata in c2
         c2.run("remove * -c")  # to make sure the download cache works

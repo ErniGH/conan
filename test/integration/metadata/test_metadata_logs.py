@@ -52,7 +52,7 @@ class TestRecipeMetadataLogs:
 
         pref = c.get_latest_package_reference(ref)
         pref_layout = c.get_latest_pkg_layout(pref)
-        assert os.listdir(pref_layout.metadata()) == ["logs"]
+        assert os.listdir(pref_layout.metadata()) == ["logs", "pkg-0.1-cyclonedx.json"]
         assert os.listdir(os.path.join(pref_layout.metadata(), "logs")) == ["mylogs.txt"]
         assert load(os.path.join(pref_layout.metadata(), "logs", "mylogs.txt")) == "some logs!!!"
 
@@ -82,7 +82,7 @@ class TestRecipeMetadataLogs:
         ref = RecipeReference.loads("pkg/0.1")
         pref = c.get_latest_package_reference(ref)
         pref_layout = c.get_latest_pkg_layout(pref)
-        assert os.listdir(pref_layout.metadata()) == ["logs"]
+        assert os.listdir(pref_layout.metadata()) == ["logs", "pkg-0.1-cyclonedx.json"]
         assert os.listdir(os.path.join(pref_layout.metadata(), "logs")) == ["mylogs.txt"]
         assert load(os.path.join(pref_layout.metadata(), "logs", "mylogs.txt")) == "some logs!!!"
 
@@ -218,6 +218,6 @@ def test_metadata_export_pkg():
     c.run("export-pkg .")
     # Test local cache looks good
     pkg_layout = c.created_layout()
-    assert os.listdir(pkg_layout.metadata()) == ["logs"]
+    assert os.listdir(pkg_layout.metadata()) == ["logs", "pkg-0.1-cyclonedx.json"]
     assert os.listdir(os.path.join(pkg_layout.metadata(), "logs")) == ["mylogs.txt"]
     assert load(os.path.join(pkg_layout.metadata(), "logs", "mylogs.txt")) == "some logs!!!"

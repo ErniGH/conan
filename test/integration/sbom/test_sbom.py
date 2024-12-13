@@ -36,7 +36,7 @@ def test_sbom_generation_install_path():
 
     #foo -> dep
     tc.run("install .")
-    assert os.path.exists(os.path.join(tc.current_folder, "foo-1.0-cyclonedx.json"))
+    assert os.path.exists(os.path.join(tc.current_folder, "CONANFILE-PY_(FOO-1-0)-cyclonedx.json"))
 
 def test_sbom_generation_install_path_consumer():
     # There is not .../d/metadata/...
