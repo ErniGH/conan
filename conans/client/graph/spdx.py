@@ -17,11 +17,7 @@ def cyclonedx_1_4(graph, **kwargs):
     from conan.api.subapi.graph import CONTEXT_BUILD
     from conan.api.output import ConanOutput
 
-
-    SPECIAL_LIST = ["cli", "conanfile.txt", "conanfile.py"]
-    is_test = bool(graph.root.conanfile.tested_reference_str)
-
-    has_special_root_node = is_test or graph.root.conanfile.display_name in SPECIAL_LIST
+    has_special_root_node = not (getattr(graph.root.ref, "name", False) and getattr(graph.root.ref, "version", False) and getattr(graph.root.ref, "revision", False))
     special_id = str(uuid.uuid4())
     special_name = graph.root.conanfile.display_name.replace(".", "-").replace(" ", "_").replace("/", "-").upper()
 
