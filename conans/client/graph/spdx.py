@@ -92,10 +92,8 @@ def cyclonedx_1_4(graph, **kwargs):
         file_name = f"{special_name}-cyclonedx.json" if has_special_root_node else f"{graph.root.name}-{graph.root.ref.version}-cyclonedx.json"
         with open(os.path.join(metadata_folder, file_name), 'w') as f:
             json.dump(sbom_cyclonedx_1_4, f, indent=4)
-        breakpoint()
         ConanOutput().success(f"CYCLONEDX CREATED - {graph.root.conanfile.package_metadata_folder}")
     except Exception as e:
-        breakpoint()
         ConanException("error generating CYCLONEDX file")
 
 def spdx_sbom(graph, **kwargs):
