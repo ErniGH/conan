@@ -175,7 +175,7 @@ def generate_graph_manifests(conanfile, home_folder):
             raise ConanException(
                 f"SBOM manifest plugin 'generate_sbom' is not a function")
 
-        ConanOutput().warning(f"generating sbom", warn_tag="experimental")
+        conanfile.output.info(f"generating sbom")
         # TODO think if this is conanfile or conanfile._conan_node
         return mod.generate_sbom(sub_graph)
 

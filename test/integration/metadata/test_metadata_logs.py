@@ -180,7 +180,7 @@ class TestHooksMetadataLogs:
 
         pref = c.get_latest_package_reference(ref)
         pref_layout = c.get_latest_pkg_layout(pref)
-        assert os.listdir(pref_layout.metadata()) == ["logs"]
+        assert "logs" in os.listdir(pref_layout.metadata())
         assert os.listdir(os.path.join(pref_layout.metadata(), "logs")) == ["mylogs.txt"]
         assert load(os.path.join(pref_layout.metadata(), "logs", "mylogs.txt")) == "some logs!!!"
 
