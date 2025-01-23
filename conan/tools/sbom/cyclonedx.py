@@ -1,5 +1,8 @@
 
 def cyclonedx_1_4(graph, **kwargs):
+    """
+    (Experimental) Generate cyclone 1.4 sbom with json format
+    """
     import uuid
     import time
     from datetime import datetime, timezone
