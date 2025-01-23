@@ -18,7 +18,7 @@ from conan.tools.sbom.cyclonedx import cyclonedx_1_4
 def post_package(conanfile):
     sbom_cyclonedx_1_4 = cyclonedx_1_4(conanfile.subgraph)
     metadata_folder = conanfile.package_metadata_folder
-    file_name = "cyclonedx_1_4.json"
+    file_name = "sbom.cdx.json"
     with open(os.path.join(metadata_folder, file_name), 'w') as f:
         json.dump(sbom_cyclonedx_1_4, f, indent=4)
     ConanOutput().success(f"CYCLONEDX CREATED - {conanfile.package_metadata_folder}")
@@ -77,7 +77,7 @@ from conan.tools.sbom.cyclonedx import cyclonedx_1_4
 def post_generate(conanfile):
     sbom_cyclonedx_1_4 = cyclonedx_1_4(conanfile.subgraph)
     metadata_folder = conanfile.package_metadata_folder
-    file_name = "cyclonedx_1_4.json"
+    file_name = "sbom.cdx.json"
     with open(os.path.join(metadata_folder, file_name), 'w') as f:
         json.dump(sbom_cyclonedx_1_4, f, indent=4)
     ConanOutput().success(f"CYCLONEDX CREATED - {conanfile.package_metadata_folder}")

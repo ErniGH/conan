@@ -44,7 +44,7 @@ def cyclonedx_1_4(graph, **kwargs):
             }]} if c.conanfile.homepage else {}),
             **({"licenses": _calculate_licenses(c)} if c.conanfile.license else {}),
             "name": c.name,
-            "fpurl": f"pkg:conan/{c.name}@{c.ref.version}?rref={c.ref.revision}",
+            "purl": f"pkg:conan/{c.name}@{c.ref.version}",
             "type": "library",
             "version": str(c.ref.version),
         } for c in components]} if components else {}),
