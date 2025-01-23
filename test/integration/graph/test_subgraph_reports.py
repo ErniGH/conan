@@ -11,13 +11,13 @@ from conans.util.files import load
 def _metadata(c, ref):
     pref = c.get_latest_package_reference(RecipeReference.loads(ref))
     return c.get_latest_pkg_layout(pref).metadata()
-
+from conan.internal.model.lockfile import Lockfile
 def test_subgraph_reports():
     c = TestClient()
     subgraph_hook = textwrap.dedent("""\
         import os, json
         from conan.tools.files import save
-        from conans.model.graph_lock import Lockfile
+        from conan.internal.model.lockfile import Lockfile
         def post_package(conanfile):
             subgraph = conanfile.subgraph
             save(conanfile, os.path.join(conanfile.package_metadata_folder, f"conangraph.json"),
