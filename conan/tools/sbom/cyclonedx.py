@@ -1,6 +1,6 @@
 
 
-def cyclonedx_1_4(graph, add_build=True, add_tests=False, **kwargs):
+def cyclonedx_1_4(graph, add_build=False, add_tests=False, **kwargs):
     """
     (Experimental) Generate cyclone 1.4 sbom with json format
     """
