@@ -13,7 +13,7 @@ import json
 import os
 from conan.errors import ConanException
 from conan.api.output import ConanOutput
-from conan.tools.sbom.cyclonedx import cyclonedx_1_4
+from conan.tools.sbom import cyclonedx_1_4
 
 def post_package(conanfile):
     sbom_cyclonedx_1_4 = cyclonedx_1_4(conanfile.subgraph, add_tests=%s)
@@ -114,7 +114,7 @@ import json
 import os
 from conan.errors import ConanException
 from conan.api.output import ConanOutput
-from conan.tools.sbom.cyclonedx import cyclonedx_1_4
+from conan.tools.sbom import cyclonedx_1_4
 
 def post_generate(conanfile):
     sbom_cyclonedx_1_4 = cyclonedx_1_4(conanfile.subgraph)
