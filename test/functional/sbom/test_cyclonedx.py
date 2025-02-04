@@ -16,7 +16,7 @@ from conan.api.output import ConanOutput
 from conan.tools.sbom import cyclonedx_1_4
 
 def post_package(conanfile):
-    sbom_cyclonedx_1_4 = cyclonedx_1_4(conanfile.subgraph, add_tool_requires=%s, add_tests=%s)
+    sbom_cyclonedx_1_4 = cyclonedx_1_4(conanfile.subgraph, add_build=%s, add_tests=%s)
     metadata_folder = conanfile.package_metadata_folder
     file_name = "sbom.cdx.json"
     with open(os.path.join(metadata_folder, file_name), 'w') as f:
