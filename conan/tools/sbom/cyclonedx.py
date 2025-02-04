@@ -1,5 +1,5 @@
 
-def cyclonedx_1_4(graph, **kwargs):
+def cyclonedx_1_4(graph, add_tests=True, **kwargs):
     """
     (Experimental) Generate cyclone 1.4 sbom with json format
     """
@@ -9,8 +9,7 @@ def cyclonedx_1_4(graph, **kwargs):
 
     has_special_root_node = not (getattr(graph.root.ref, "name", False) and getattr(graph.root.ref, "version", False) and getattr(graph.root.ref, "revision", False))
     special_id = str(uuid.uuid4())
-
-    components = [node for node in graph.nodes]
+    components = [node for node in graph.nodes if add_tests or not node.test]
     if has_special_root_node:
         components = components[1:]
 
@@ -22,7 +21,7 @@ def cyclonedx_1_4(graph, **kwargs):
         dependencies.append(deps)
     for c in components:
         deps = {"ref": f"pkg:conan/{c.name}@{c.ref.version}?rref={c.ref.revision}"}
-        depends_on = [f"pkg:conan/{d.dst.name}@{d.dst.ref.version}?rref={d.dst.ref.revision}" for d in c.dependencies]
+        depends_on = [f"pkg:conan/{d.dst.name}@{d.dst.ref.version}?rref={d.dst.ref.revision}" for d in c.dependencies if add_tests or not d.require.test]
         if depends_on:
             deps["dependsOn"] = depends_on
         dependencies.append(deps)
