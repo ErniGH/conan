@@ -26,7 +26,9 @@ def cyclonedx_1_4(graph, name=None, add_build=False, add_tests=False, **kwargs):
         dependencies.append(deps)
     for c in components:
         deps = {"ref": f"pkg:conan/{c.name}@{c.ref.version}?rref={c.ref.revision}"}
-        depends_on = [f"pkg:conan/{d.dst.name}@{d.dst.ref.version}?rref={d.dst.ref.revision}" for d in c.dependencies]
+        dep = [d for d in c.dependencies if (d.dst.context == "host" or add_build) and (not d.dst.test or add_tests)]
+
+        depends_on = [f"pkg:conan/{d.dst.name}@{d.dst.ref.version}?rref={d.dst.ref.revision}" for d in dep]
         if depends_on:
             deps["dependsOn"] = depends_on
         dependencies.append(deps)
