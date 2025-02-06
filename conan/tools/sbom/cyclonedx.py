@@ -11,8 +11,8 @@ def cyclonedx_1_4(graph, name=None, add_build=False, add_tests=False, **kwargs):
     has_special_root_node = not (getattr(graph.root.ref, "name", False) and getattr(graph.root.ref, "version", False) and getattr(graph.root.ref, "revision", False))
     special_id = str(uuid.uuid4())
 
-    name_default = "conan-sbom" if not graph.root.ref or not graph.root.ref.name else graph.root.ref.name
-    name_default += "" if not graph.root.ref or not graph.root.ref.version else f"/{graph.root.ref.version}"
+    name_default = graph.root.ref.name if bool(getattr(graph.root.ref, "name", False)) else "conan-sbom"
+    name_default += f"/{graph.root.ref.version}" if bool(getattr(graph.root.ref, "version", False)) else ""
     components = [node for node in graph.nodes if (node.context == "host" or add_build) and (not node.test or add_tests)]
     if has_special_root_node:
         components = components[1:]
