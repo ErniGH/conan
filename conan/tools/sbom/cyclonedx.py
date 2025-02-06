@@ -1,5 +1,6 @@
 
-def cyclonedx_1_4(graph, **kwargs):
+
+def cyclonedx_1_4(graph, name=None, add_build=False, add_tests=False, **kwargs):
     """
     (Experimental) Generate cyclone 1.4 sbom with json format
     """
@@ -11,6 +12,9 @@ def cyclonedx_1_4(graph, **kwargs):
     special_id = str(uuid.uuid4())
 
     components = [node for node in graph.nodes]
+    name_default = graph.root.ref.name or "conan-sbom"
+    name_default += f"/{graph.root.ref.version}" if bool(graph.root.ref.version) else ""
+    components = [node for node in graph.nodes if (node.context == "host" or add_build) and (not node.test or add_tests)]
     if has_special_root_node:
         components = components[1:]
 
@@ -56,7 +60,7 @@ def cyclonedx_1_4(graph, **kwargs):
             "component": {
                 "author": "Conan",
                 "bom-ref": special_id if has_special_root_node else f"pkg:conan/{c.name}@{c.ref.version}?rref={c.ref.revision}",
-                "name": graph.root.conanfile.display_name,
+                "name": name if name else name_default,
                 "type": "library"
             },
             "timestamp": f"{datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')}",
