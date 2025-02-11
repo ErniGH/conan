@@ -3,6 +3,28 @@
 def cyclonedx_1_4(graph, name=None, add_build=False, add_tests=False, **kwargs):
     """
     (Experimental) Generate cyclone 1.4 sbom with json format
+
+    Generate a CycloneDX 1.4 document from the specified conanfile.
+
+    This function allows for customization with the following parameters:
+
+    - `name`: Specify a custom name for the metadata field (e.g., `name="custom_name"`).
+    - `add_build`: Include build dependencies (default is False).
+    - `add_test`: Include test dependencies (default is False).
+
+    Example usage:
+    ```
+    cyclonedx(conanfile.subgraph, name="custom_name", add_build=True, add_test=True)
+    ```
+
+    Parameters:
+        conanfile: The conanfile object for the project.
+        name (str, optional): Custom name for the metadata field.
+        add_build (bool, optional): Include build dependencies.
+        add_test (bool, optional): Include test dependencies.
+
+    Returns:
+        The generated CycloneDX 1.4 document.
     """
     import uuid
     import time
