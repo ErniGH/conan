@@ -1,6 +1,6 @@
 
 
-def cyclonedx_1_4(conanfile, graph, name=None, add_build=False, add_tests=False, **kwargs):
+def cyclonedx_1_4(conanfile, name=None, add_build=False, add_tests=False, **kwargs):
     """
     (Experimental) Generate cyclone 1.4 SBOM with JSON format
 
@@ -10,7 +10,6 @@ def cyclonedx_1_4(conanfile, graph, name=None, add_build=False, add_tests=False,
 
     Parameters:
         conanfile: The conanfile instance.
-        graph: A Conan dependency graph object
         name (str, optional): Custom name for the metadata field.
         add_build (bool, optional, default=False): Include build dependencies.
         add_tests (bool, optional, default=False): Include test dependencies.
@@ -27,6 +26,7 @@ def cyclonedx_1_4(conanfile, graph, name=None, add_build=False, add_tests=False,
     import uuid
     import time
     from datetime import datetime, timezone
+    graph = conanfile.subgraph
 
     has_special_root_node = not (getattr(graph.root.ref, "name", False) and getattr(graph.root.ref, "version", False) and getattr(graph.root.ref, "revision", False))
     special_id = str(uuid.uuid4())
