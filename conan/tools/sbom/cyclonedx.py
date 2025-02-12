@@ -1,25 +1,28 @@
 
 
-def cyclonedx_1_4(graph, name=None, add_build=False, add_tests=False, **kwargs):
+def cyclonedx_1_4(conanfile, graph, name=None, add_build=False, add_tests=False, **kwargs):
     """
-    (Experimental) Generate cyclone 1.4 sbom with json format
+    (Experimental) Generate cyclone 1.4 SBOM with JSON format
 
     Creates a CycloneDX 1.4 Software Bill of Materials (SBOM) from a given dependency graph.
 
 
-    Example usage:
-    ```
-    cyclonedx(conanfile.subgraph, name="custom_name", add_build=True, add_test=True)
-    ```
 
     Parameters:
-        subgraph: A Conan dependency graph object
+        conanfile: The actual conanfile instance.
+        graph: A Conan dependency graph object
         name (str, optional): Custom name for the metadata field.
         add_build (bool, optional, default=False): Include build dependencies.
         add_tests (bool, optional, default=False): Include test dependencies.
 
     Returns:
         The generated CycloneDX 1.4 document as a string.
+
+    Example usage:
+    ```
+    cyclonedx(conanfile.subgraph, name="custom_name", add_build=True, add_test=True)
+    ```
+
     """
     import uuid
     import time
