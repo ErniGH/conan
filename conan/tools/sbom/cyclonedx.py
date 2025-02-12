@@ -18,7 +18,7 @@ def cyclonedx_1_4(graph, name=None, add_build=False, add_tests=False, **kwargs):
     ```
 
     Parameters:
-        conanfile: The conanfile object for the project.
+        subgraph: A Conan dependency graph object
         name (str, optional): Custom name for the metadata field.
         add_build (bool, optional): Include build dependencies.
         add_test (bool, optional): Include test dependencies.
