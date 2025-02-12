@@ -21,7 +21,7 @@ def cyclonedx_1_4(graph, name=None, add_build=False, add_tests=False, **kwargs):
         subgraph: A Conan dependency graph object
         name (str, optional): Custom name for the metadata field.
         add_build (bool, optional, default=False): Include build dependencies.
-        add_test (bool, optional, default=False): Include test dependencies.
+        add_tests (bool, optional, default=False): Include test dependencies.
 
     Returns:
         The generated CycloneDX 1.4 document as a string.
