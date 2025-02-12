@@ -19,7 +19,7 @@ def cyclonedx_1_4(conanfile, name=None, add_build=False, add_tests=False, **kwar
 
     Example usage:
     ```
-    cyclonedx(conanfile.subgraph, name="custom_name", add_build=True, add_test=True)
+    cyclonedx(conanfile, name="custom_name", add_build=True, add_test=True, **kwargs)
     ```
 
     """
