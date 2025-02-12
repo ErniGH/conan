@@ -24,7 +24,7 @@ def cyclonedx_1_4(graph, name=None, add_build=False, add_tests=False, **kwargs):
         add_test (bool, optional, default=False): Include test dependencies.
 
     Returns:
-        The generated CycloneDX 1.4 document.
+        The generated CycloneDX 1.4 document as a string.
     """
     import uuid
     import time
