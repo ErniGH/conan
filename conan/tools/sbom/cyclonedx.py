@@ -6,11 +6,6 @@ def cyclonedx_1_4(graph, name=None, add_build=False, add_tests=False, **kwargs):
 
     Creates a CycloneDX 1.4 Software Bill of Materials (SBOM) from a given dependency graph.
 
-    This function allows for customization with the following parameters:
-
-    - `name`: Specify a custom name for the metadata field (e.g., `name="custom_name"`).
-    - `add_build`: Include build dependencies (default is False).
-    - `add_tests`: Include test dependencies (default is False).
 
     Example usage:
     ```
