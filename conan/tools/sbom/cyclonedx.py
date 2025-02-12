@@ -10,7 +10,7 @@ def cyclonedx_1_4(graph, name=None, add_build=False, add_tests=False, **kwargs):
 
     - `name`: Specify a custom name for the metadata field (e.g., `name="custom_name"`).
     - `add_build`: Include build dependencies (default is False).
-    - `add_test`: Include test dependencies (default is False).
+    - `add_tests`: Include test dependencies (default is False).
 
     Example usage:
     ```
