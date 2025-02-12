@@ -4,7 +4,7 @@ def cyclonedx_1_4(graph, name=None, add_build=False, add_tests=False, **kwargs):
     """
     (Experimental) Generate cyclone 1.4 sbom with json format
 
-    Generate a CycloneDX 1.4 document from the specified conanfile.
+    Generate a CycloneDX 1.4 document as a string from the given dependency graph.
 
     This function allows for customization with the following parameters:
 
